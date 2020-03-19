@@ -44,7 +44,4 @@ public class FetchJsonDataImpl {
         List<User> users = fetchJsonData.getAllUsers().execute().body();
         return new AsyncResult<>(users);
     }
-
-
-
 }

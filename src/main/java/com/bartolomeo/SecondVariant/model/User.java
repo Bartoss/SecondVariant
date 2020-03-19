@@ -24,6 +24,10 @@ public class User {
 
     private int countPosts;
 
+    private double lowestDistance;
+
+    private String lowestDistanceNeighbourName;
+
     public int getId() {
         return id;
     }
@@ -102,5 +106,21 @@ public class User {
 
     public void setCountPosts(int countPosts) {
         this.countPosts = countPosts;
+    }
+
+    public double getLowestDistance() {
+        return lowestDistance;
+    }
+
+    public void setLowestDistance(double lowestDistance) {
+        this.lowestDistance = lowestDistance;
+    }
+
+    public String getLowestDistanceNeighbourName() {
+        return lowestDistanceNeighbourName;
+    }
+
+    public void setLowestDistanceNeighbourName(String lowestDistanceNeighbourName) {
+        this.lowestDistanceNeighbourName = lowestDistanceNeighbourName;
     }
 }
