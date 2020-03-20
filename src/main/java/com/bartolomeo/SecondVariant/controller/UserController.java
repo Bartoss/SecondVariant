@@ -62,7 +62,7 @@ public class UserController {
         Future<List<User>> users = fetchJsonDataImpl.getAllUsers();
 
 
-        for (int i = 1; i < users.get().size()+1; i++) {
+        for (int i = 1; i < users.get().size() + 1; i++) {
             Future<Optional<User>> futureUser = fetchJsonDataImpl.getUser(i);
             Future<List<Post>> futurePosts = fetchJsonDataImpl.getPostByUser(i);
             ArrayList<String> listOfPostsUnique = new ArrayList<>();
@@ -82,8 +82,8 @@ public class UserController {
                     listOfPostsRepeted.add(post.getTitle());
                 }
             }
-            uniquePostsMap.put(user.getId(),listOfPostsUnique);
-            repeatedPostsMap.put(user.getId(),listOfPostsRepeted);
+            uniquePostsMap.put(user.getId(), listOfPostsUnique);
+            repeatedPostsMap.put(user.getId(), listOfPostsRepeted);
 
         }
         return repeatedPostsMap;
@@ -91,13 +91,12 @@ public class UserController {
 
     @RequestMapping(value = "/nearestUser", method = RequestMethod.GET)
     public Long nearestUser() throws IOException, InterruptedException, ExecutionException, UserNotFoundException {
-        String value = new String();
         Future<List<User>> users = fetchJsonDataImpl.getAllUsers();
         Future<Optional<User>> futureUser;
         Future<Optional<User>> futureUser2;
-        long distance = 1L;
-
-        for (int i = 1; i < users.get().size()+1; i++) {
+        long distance = 1000000000;
+        for (int i = 1; i < users.get().size() + 1; i++) {
+            distance = 1000000000;
             futureUser = fetchJsonDataImpl.getUser(i);
 
             Optional<User> optionalUser = futureUser.get();
@@ -108,35 +107,30 @@ public class UserController {
             User user = optionalUser.get();
             double lat1 = user.getAddress().getGeo().getLat();
             double lng1 = user.getAddress().getGeo().getLng();
-            distance = haversineModell.calculateRound(lat1,lng1,10,10);
-            System.out.println(distance);
 
-//            for(int j = 1; j< users.get().size()+1; j++){
-//                double temp = calculateDistanceInMeters(lat1,lng1,4,4);
-//                if(distance > temp){
-//                    distance = temp;
-//                    user.setLowestDistance(distance);
-//                }
-//            }
-            //System.out.println("User " + user.getUsername() + "best distance: " + user.getLowestDistance()+ "with user: " + user.getLowestDistanceNeighbourName());
+            for (int j = 1; j < users.get().size() + 1; j++) {
+                futureUser2 = fetchJsonDataImpl.getUser(j);
+
+                Optional<User> optionalUser2 = futureUser2.get();
+                if (!optionalUser2.isPresent()) {
+                    throw new UserNotFoundException();
+                }
+
+                User user2 = optionalUser2.get();
+                if (user.getId() != user2.getId()) {
+                    double lat2 = user2.getAddress().getGeo().getLat();
+                    double lng2 = user2.getAddress().getGeo().getLng();
+                    long temp = haversineModell.calculateRound(lat1, lng1, lat2, lng2);
+                    if (distance > temp) {
+                        distance = temp;
+                        user.setLowestDistance(distance);
+                        user.setLowestDistanceNeighbourName(user2.getUsername());
+                    }
+                }
+
+            }
+            System.out.println("User " + user.getUsername() + " best distance: " + user.getLowestDistance()+ " with user: " + user.getLowestDistanceNeighbourName());
         }
         return distance;
     }
-
-//    futureUser2 = fetchJsonDataImpl.getUser(j);
-//
-//    Optional<User> optionalUser2 = futureUser2.get();
-//                if (!optionalUser2.isPresent()) {
-//        throw new UserNotFoundException();
-//    }
-//
-//    User user2 = optionalUser.get();
-//    double lat2 = user2.getAddress().getGeo().getLat();
-//    double lng2 = user2.getAddress().getGeo().getLng();
-//    double temp = calculateDistanceInMeters(lat1,lng1,lat2,lng2);
-//                if(distance > temp){
-//        distance = temp;
-//        user.setLowestDistance(distance);
-//        user.setLowestDistanceNeighbourName(user2.getUsername());
-//    }
 }
