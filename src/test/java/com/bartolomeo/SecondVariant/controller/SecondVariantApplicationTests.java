@@ -1,5 +1,6 @@
-package com.bartolomeo.SecondVariant;
+package com.bartolomeo.SecondVariant.controller;
 
+import com.bartolomeo.SecondVariant.SecondVariantApplication;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;

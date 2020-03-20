@@ -23,7 +23,7 @@ public class HaversineModell {
      * @since 1.0
      */
 
-    private double calculate(double lat1, double lon1, double lat2, double lon2) {
+    public double calculate(double lat1, double lon1, double lat2, double lon2) {
         double lat1Rad = toRadians(lat1);
         double lat2Rad = toRadians(lat2);
         double latDelta = toRadians(lat2 - lat1);

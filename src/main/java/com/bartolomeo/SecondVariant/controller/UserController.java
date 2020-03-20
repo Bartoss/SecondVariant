@@ -49,13 +49,13 @@ public class UserController {
             User user = optionalUser.get();
             user.setPosts(posts);
             user.setCountPosts(postCount);
-            System.out.println(user.getUsername() + " napisal(a) " + user.getCountPosts() + " postow");
             response.setId(user.getId());
             response.setUser(user.getUsername());
             response.setMessageOne("napisal(a)");
             response.setPostCount(user.getCountPosts());
             response.setMessageTwo("postow");
             responseList.add(response);
+            System.out.println(response.getUser() + " " + response.getMessageOne() + " " + user.getCountPosts() + " " + response.getMessageTwo());
         }
 
         return responseList;

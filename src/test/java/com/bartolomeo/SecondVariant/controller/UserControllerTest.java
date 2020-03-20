@@ -1,6 +1,7 @@
-package com.bartolomeo.SecondVariant;
+package com.bartolomeo.SecondVariant.controller;
 
 
+import com.bartolomeo.SecondVariant.CheckFutureTest;
 import com.bartolomeo.SecondVariant.controller.UserController;
 import com.bartolomeo.SecondVariant.model.*;
 import com.bartolomeo.SecondVariant.service.FetchJsonDataImpl;
@@ -144,8 +145,11 @@ public class UserControllerTest {
         Future<List<User>> usersFuture = new CheckFutureTest<>(allUsers);
         when(fetchJsonDataImpl.getAllUsers()).thenReturn(usersFuture);
 
+
         List<User> produce = userController.nearestUser();
-        System.out.println(produce.size());
+        //System.out.println(produce.size());
+        assertThat(produce.size(), is(3));
+
 
 
     }
