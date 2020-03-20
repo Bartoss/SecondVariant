@@ -1,6 +1,7 @@
 package com.bartolomeo.SecondVariant.controller;
 
 import com.bartolomeo.SecondVariant.model.Post;
+import com.bartolomeo.SecondVariant.model.Response;
 import com.bartolomeo.SecondVariant.model.User;
 import com.bartolomeo.SecondVariant.service.FetchJsonDataImpl;
 import com.bartolomeo.SecondVariant.service.HaversineModell;
@@ -10,11 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.sound.midi.SysexMessage;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -23,7 +22,6 @@ public class UserController {
 
     private final FetchJsonDataImpl fetchJsonDataImpl;
     private HashMap<Integer, ArrayList<String>> repeatedPostsMap = new HashMap<>();
-    private HashMap<Integer, ArrayList<String>> uniquePostsMap = new HashMap<>();
     private HaversineModell haversineModell = new HaversineModell();
 
     @Autowired
@@ -32,14 +30,15 @@ public class UserController {
     }
 
     @RequestMapping(value = "/countUsersPosts", method = RequestMethod.GET)
-    public String countUsersPosts() throws IOException, InterruptedException, ExecutionException, UserNotFoundException {
-        String value = new String();
+    public List<Response> countUsersPosts() throws IOException, InterruptedException, ExecutionException, UserNotFoundException {
+
+        List<Response> responseList = new ArrayList<>();
         Future<List<User>> users = fetchJsonDataImpl.getAllUsers();
 
-        for (int i = 1; i < users.get().size(); i++) {
+        for (int i = 1; i < users.get().size() + 1; i++) {
             Future<Optional<User>> futureUser = fetchJsonDataImpl.getUser(i);
             Future<List<Post>> futurePosts = fetchJsonDataImpl.getPostByUser(i);
-
+            Response response = new Response();
             Optional<User> optionalUser = futureUser.get();
             if (!optionalUser.isPresent()) {
                 throw new UserNotFoundException();
@@ -50,17 +49,22 @@ public class UserController {
             User user = optionalUser.get();
             user.setPosts(posts);
             user.setCountPosts(postCount);
-            System.out.println(user.getUsername() + " wrote count(" + user.getCountPosts() + ") posts ");
-            value += user.getUsername() + " wrote count(" + user.getCountPosts() + ") posts \n";
+            System.out.println(user.getUsername() + " napisał(a) " + user.getCountPosts() + " postów");
+            response.setId(user.getId());
+            response.setUser(user.getUsername());
+            response.setMessageOne("napisal(a)");
+            response.setPostCount(user.getCountPosts());
+            response.setMessageTwo("postow");
+            responseList.add(response);
         }
 
-        return value;
+        return responseList;
     }
 
     @RequestMapping(value = "/checkUniqePosts", method = RequestMethod.GET)
     public HashMap<Integer, ArrayList<String>> checkUniquePosts() throws IOException, InterruptedException, ExecutionException, UserNotFoundException {
         Future<List<User>> users = fetchJsonDataImpl.getAllUsers();
-
+        HashSet<String> repetedSet = new HashSet<>();
 
         for (int i = 1; i < users.get().size() + 1; i++) {
             Future<Optional<User>> futureUser = fetchJsonDataImpl.getUser(i);
@@ -76,21 +80,22 @@ public class UserController {
             User user = optionalUser.get();
             user.setPosts(posts);
             for (Post post : posts) {
-                if ((uniquePostsMap.containsValue(post.getTitle())) == false) {
-                    listOfPostsUnique.add(post.getTitle());
-                } else {
+                if (repetedSet.add(post.getTitle()) == false) {
                     listOfPostsRepeted.add(post.getTitle());
                 }
             }
-            uniquePostsMap.put(user.getId(), listOfPostsUnique);
+
+
             repeatedPostsMap.put(user.getId(), listOfPostsRepeted);
+
 
         }
         return repeatedPostsMap;
     }
 
     @RequestMapping(value = "/nearestUser", method = RequestMethod.GET)
-    public Long nearestUser() throws IOException, InterruptedException, ExecutionException, UserNotFoundException {
+    public Long nearestUser() throws
+            IOException, InterruptedException, ExecutionException, UserNotFoundException {
         Future<List<User>> users = fetchJsonDataImpl.getAllUsers();
         Future<Optional<User>> futureUser;
         Future<Optional<User>> futureUser2;
@@ -127,9 +132,8 @@ public class UserController {
                         user.setLowestDistanceNeighbourName(user2.getUsername());
                     }
                 }
-
             }
-            System.out.println("User " + user.getUsername() + " best distance: " + user.getLowestDistance()+ " with user: " + user.getLowestDistanceNeighbourName());
+            System.out.println("User " + user.getUsername() + " best distance: " + user.getLowestDistance() + " with user: " + user.getLowestDistanceNeighbourName());
         }
         return distance;
     }
