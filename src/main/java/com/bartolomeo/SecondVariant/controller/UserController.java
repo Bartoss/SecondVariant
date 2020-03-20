@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.sound.midi.SysexMessage;
+
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -49,7 +49,7 @@ public class UserController {
             User user = optionalUser.get();
             user.setPosts(posts);
             user.setCountPosts(postCount);
-            System.out.println(user.getUsername() + " napisał(a) " + user.getCountPosts() + " postów");
+            System.out.println(user.getUsername() + " napisal(a) " + user.getCountPosts() + " postow");
             response.setId(user.getId());
             response.setUser(user.getUsername());
             response.setMessageOne("napisal(a)");
@@ -65,12 +65,12 @@ public class UserController {
     public HashMap<Integer, ArrayList<String>> checkUniquePosts() throws IOException, InterruptedException, ExecutionException, UserNotFoundException {
         Future<List<User>> users = fetchJsonDataImpl.getAllUsers();
         HashSet<String> repetedSet = new HashSet<>();
+        ArrayList<String> listOfPostsRepeted = new ArrayList<>();
 
         for (int i = 1; i < users.get().size() + 1; i++) {
             Future<Optional<User>> futureUser = fetchJsonDataImpl.getUser(i);
             Future<List<Post>> futurePosts = fetchJsonDataImpl.getPostByUser(i);
-            ArrayList<String> listOfPostsUnique = new ArrayList<>();
-            ArrayList<String> listOfPostsRepeted = new ArrayList<>();
+
             Optional<User> optionalUser = futureUser.get();
             if (!optionalUser.isPresent()) {
                 throw new UserNotFoundException();
@@ -85,23 +85,28 @@ public class UserController {
                 }
             }
 
-
             repeatedPostsMap.put(user.getId(), listOfPostsRepeted);
 
-
         }
+        System.out.println("Repeted Title");
+        repeatedPostsMap.forEach((k, v) -> {
+            System.out.println("key: " + k + " value: " + v);
+        });
         return repeatedPostsMap;
     }
 
     @RequestMapping(value = "/nearestUser", method = RequestMethod.GET)
-    public Long nearestUser() throws
+    public List<User> nearestUser() throws
             IOException, InterruptedException, ExecutionException, UserNotFoundException {
         Future<List<User>> users = fetchJsonDataImpl.getAllUsers();
         Future<Optional<User>> futureUser;
         Future<Optional<User>> futureUser2;
-        long distance = 1000000000;
+        List<User> usersList = new ArrayList<>();
+        var ref = new Object() {
+            long distance;
+        };
         for (int i = 1; i < users.get().size() + 1; i++) {
-            distance = 1000000000;
+            ref.distance = 1000000000;
             futureUser = fetchJsonDataImpl.getUser(i);
 
             Optional<User> optionalUser = futureUser.get();
@@ -112,29 +117,23 @@ public class UserController {
             User user = optionalUser.get();
             double lat1 = user.getAddress().getGeo().getLat();
             double lng1 = user.getAddress().getGeo().getLng();
-
-            for (int j = 1; j < users.get().size() + 1; j++) {
-                futureUser2 = fetchJsonDataImpl.getUser(j);
-
-                Optional<User> optionalUser2 = futureUser2.get();
-                if (!optionalUser2.isPresent()) {
-                    throw new UserNotFoundException();
-                }
-
-                User user2 = optionalUser2.get();
-                if (user.getId() != user2.getId()) {
-                    double lat2 = user2.getAddress().getGeo().getLat();
-                    double lng2 = user2.getAddress().getGeo().getLng();
+            //System.out.println("lng1: " + lng1 + " lat1:" + lat1);
+            users.get().forEach(person ->{
+                if(user.getId() != person.getId()){
+                    double lat2 = person.getAddress().getGeo().getLat();
+                    double lng2 = person.getAddress().getGeo().getLng();
+                    //System.out.println("lng2: " + lng2 + " lat2:" + lat2);
                     long temp = haversineModell.calculateRound(lat1, lng1, lat2, lng2);
-                    if (distance > temp) {
-                        distance = temp;
-                        user.setLowestDistance(distance);
-                        user.setLowestDistanceNeighbourName(user2.getUsername());
+                    if (ref.distance > temp) {
+                        ref.distance = temp;
+                        user.setLowestDistance(ref.distance);
+                        user.setLowestDistanceNeighbourName(person.getUsername());
                     }
                 }
-            }
+            });
+            usersList.add(user);
             System.out.println("User " + user.getUsername() + " best distance: " + user.getLowestDistance() + " with user: " + user.getLowestDistanceNeighbourName());
         }
-        return distance;
+        return usersList;
     }
 }
