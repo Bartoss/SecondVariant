@@ -61,7 +61,7 @@ public class UserController {
         return responseList;
     }
 
-    @RequestMapping(value = "/checkUniqePosts", method = RequestMethod.GET)
+    @RequestMapping(value = "/checkUniquePosts", method = RequestMethod.GET)
     public HashMap<Integer, ArrayList<String>> checkUniquePosts() throws IOException, InterruptedException, ExecutionException, UserNotFoundException {
         Future<List<User>> users = fetchJsonDataImpl.getAllUsers();
         HashSet<String> repetedSet = new HashSet<>();
