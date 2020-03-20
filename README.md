@@ -4,10 +4,10 @@ This simple app download data about posts from https://jsonplaceholder.typicode.
 ## GET /countUsersPosts
 * Count how much posts wrote users and return number of them as List of String "user_name" napisał count postów.
 
-##GET /checkUniquePosts
+## GET /checkUniquePosts
 * Check if title of post is unique and return list of repeated titles
 
-##GET /nearestUser
+## GET /nearestUser
 * For all users find other user who lives closest to him
 
 ## How to run
