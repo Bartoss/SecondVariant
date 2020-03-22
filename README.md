@@ -11,7 +11,7 @@ This simple app download data about posts from https://jsonplaceholder.typicode.
 * For all users find other user who lives closest to him
 
 ## How to run
-* mvn spring-boot:run
+* gradle bootRun
 * go to: [http://localhost:8080/countUsersPosts](http://localhost:8080/countUsersPosts) to see result for all user or
     [http://localhost:8080/checkUniqePosts](http://localhost:8080/checkUniqePosts) to check if title of post is unique and return list of repeated titles
     [http://localhost:8080/nearestUser](http://localhost:8080/nearestUser) For all users find other user who lives closest to him
